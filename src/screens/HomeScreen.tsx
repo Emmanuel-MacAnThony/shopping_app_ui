@@ -8,12 +8,15 @@ import {
   TextInput,
   FlatList,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useRef, useMemo, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "@react-navigation/native";
 import Icons from "@expo/vector-icons/MaterialCommunityIcons";
 import MasonryList from "reanimated-masonry-list";
 import { BlurView } from "expo-blur";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import CustomBackdrop from "../components/CustomBackdrop";
+import FilterView from "../components/FilterView";
 
 const AVATAR_URI =
   "https://images.unsplash.com/photo-1600486913747-55e5470d6f40?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTd8fG1hbnxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=600&q=60";
@@ -39,6 +42,16 @@ const CATEGORIES = [
 const HomeScreen = () => {
   const { colors } = useTheme();
   const [categoriesIndex, setCategoriesIndex] = useState<number>(0);
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const snapPoints = useMemo(() => ["25%", "80%"], []);
+
+  const openFilterModal = useCallback(() => {
+    bottomSheetModalRef.current?.present();
+  }, []);
+  const handleSheetChanges = useCallback((index: number) => {
+    console.log("handleSheetChanges", index);
+  }, []);
+
   return (
     <ScrollView>
       <SafeAreaView style={{ paddingVertical: 24, gap: 24 }}>
@@ -129,6 +142,7 @@ const HomeScreen = () => {
               borderRadius: 52,
               backgroundColor: colors.primary,
             }}
+            onPress={openFilterModal}
           >
             <Icons name="tune" size={24} color={colors.background} />
           </TouchableOpacity>
@@ -295,6 +309,14 @@ const HomeScreen = () => {
           onEndReachedThreshold={0.1}
         />
       </SafeAreaView>
+      <BottomSheetModal
+        snapPoints={snapPoints}
+        index={1}
+        ref={bottomSheetModalRef}
+        backdropComponent={(props) => <CustomBackdrop {...props} />}
+      >
+        <FilterView />
+      </BottomSheetModal>
     </ScrollView>
   );
 };
